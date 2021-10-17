@@ -19,3 +19,9 @@ func Connect(connectionString string) error {
 	log.Println("Connection was successful!!")
 	return nil
 }
+
+//Migrate create/updates database table
+func Migrate(table interface{}) {
+	Connector.AutoMigrate(&table)
+	log.Println("Table migrated")
+}

@@ -1,0 +1,13 @@
+[{
+    "product": "prod 1",
+    "password": "kaliparejaya123",
+    "email": "terpalmurah@gmail.com",
+    "group": "admin",
+    "productId" : "2"
+}, {
+    "product": "prod 2",
+    "password": "masokpakeko",
+    "email": "cikrakbaja@gmail.com",
+    "group": "publisher",
+    "productId" : "20"
+}]

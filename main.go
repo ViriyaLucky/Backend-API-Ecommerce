@@ -3,21 +3,64 @@ package main
 import (
 	"ecommerce-api/database"
 	"ecommerce-api/handler"
-	"log"
-	"net/http"
+	"ecommerce-api/models"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql" //Required for MySQL dialect
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
+
+var JWT_SIGNATURE_KEY = []byte("the secret of kalimdor")
 
 func main() {
 
 	// connect to DB
+	initDb()
+
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	// Login route
+	e.POST("/login", handler.Loginhandler)
+
+	// Register route
+	e.POST("/register", handler.Loginhandler)
+
+	// Product API
+	e.GET("/api/v1/product", handler.ProductHandler)
+	// r.GET("/product/", handler.ProductHandler)
+
+	// Restricted group
+	r := e.Group("/api/v1/user")
+
+	// Configure middleware with the custom claims type
+	config := middleware.JWTConfig{
+		Claims:     &models.MyClaims{},
+		SigningKey: JWT_SIGNATURE_KEY,
+	}
+	r.Use(middleware.JWTWithConfig(config))
+	r.GET("", handler.ErrorHandler)
+
+	// User API
+	r.GET("/profile", handler.UserHandler)
+	r.GET("/orders", handler.OrderHandler)
+
+	// // Cart API
+	// r.GET("/cart", handler.CartHandler)
+
+	e.Logger.Fatal(e.Start(":8080"))
+}
+
+func initDb() {
 	config :=
 		database.Config{
 			ServerName: "localhost:3306",
 			User:       "root",
-			Password:   "root",
-			DB:         "learning",
+			Password:   "",
+			DB:         "ecommerce",
 		}
 
 	connectionString := database.GetConnectionString(config)
@@ -25,26 +68,4 @@ func main() {
 	if dbErr != nil {
 		panic(dbErr.Error())
 	}
-
-	mux := http.NewServeMux()
-
-	// User API
-	mux.HandleFunc("/api/user/login", handler.Loginhandler)
-	mux.HandleFunc("/api/user/register", handler.RegisterHandler)
-	mux.HandleFunc("/api/user", handler.UserHandler)
-
-	// Product API
-	mux.HandleFunc("/api/product", handler.ProductHandler)
-
-	// Cart API
-	mux.HandleFunc("/api/cart", handler.CartHandler)
-
-	// Other route
-	mux.HandleFunc("/", handler.ErrorHandler)
-	log.Println("Starting on port 8080")
-
-	// Error log
-	err := http.ListenAndServe(":8080", mux)
-
-	log.Fatal(err)
 }

@@ -1,0 +1,13 @@
+[{
+    "username": "noval",
+    "password": "$2a$10$fRIW2Dw0GFaBWT0e2A0WteKwAyb2uONdwdatlSD0IO.mZbBlWvix2",
+    "email": "terpalmurah@gmail.com",
+    "group": "admin",
+    "UserId": "1"
+}, {
+    "username": "farhan",
+    "password": "masokpakeko",
+    "email": "cikrakbaja@gmail.com",
+    "group": "publisher",
+    "UserId" : "2"
+}]
