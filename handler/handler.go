@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -83,6 +84,26 @@ func Loginhandler(c echo.Context) error {
 }
 
 func ProductHandler(c echo.Context) error {
+
+	// Add Product
+	if c.Request().Method == "POST" {
+		// Declare a new Person struct.
+		var p models.Product
+
+		// Try to decode the request body into the struct. If there is an error,
+		// respond to the client with the error message and a 400 status code.
+		err := json.NewDecoder(c.Request().Body).Decode(&p)
+		if err != nil {
+			return err
+		}
+		errModel := models.AddProduct(&p)
+		if errModel != nil {
+			return err
+		} else {
+			return c.JSON(http.StatusOK, p)
+		}
+	}
+
 	// get the product id
 	if c.Request().URL.Query().Has("id") {
 		id := c.Request().URL.Query().Get("id")
@@ -92,18 +113,6 @@ func ProductHandler(c echo.Context) error {
 		result := models.GetProducts()
 		return c.JSON(http.StatusOK, result)
 	}
-	// if productIdParam != "" && len(path) > 3 {
-	// 	prod := gubrak.From(data).Find(func(each M) bool {
-	// 		return each["productId"] == productIdParam
-	// 	}).Result()
-	// 	res := prod.(M)
-	// 	w.Header().Set("Content-Type", "application/json")
-	// 	json.NewEncoder(w).Encode(res)
-	// } else {
-	// 	w.Header().Set("Content-Type", "application/json")
-	// 	// res, _ := json.Marshal(data)
-	// 	json.NewEncoder(w).Encode(data)
-	// }
 }
 func OrderHandler(c echo.Context) error {
 	userId := getUserIdFromJwt(c)
@@ -113,13 +122,52 @@ func OrderHandler(c echo.Context) error {
 }
 
 func CartHandler(c echo.Context) error {
-	// if r.URL.Path != "/smth/" {
-	// 	ErrorHandler(w, r, )
-	// 	return
-	// }
-	return c.JSON(http.StatusOK, echo.Map{
-		"result": "test",
-	})
+	userId := getUserIdFromJwt(c)
+
+	result := models.GetCart(userId)
+	return c.JSON(http.StatusOK, result)
+}
+
+func CheckoutHandler(c echo.Context) error {
+	userId := getUserIdFromJwt(c)
+	var products []int
+	err := json.NewDecoder(c.Request().Body).Decode(&products)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+	result, err := models.Checkout(products, userId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+	if len(result) == 0 {
+		return c.JSON(http.StatusBadGateway, err)
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func UpdateCartHandler(c echo.Context) error {
+	userId := getUserIdFromJwt(c)
+	method := c.Request().Method
+	itemIdParam := c.Param("itemid")
+	itemId, errConv := strconv.Atoi(itemIdParam)
+
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	if method == "POST" {
+		res, err := models.AddToCart(itemId, userId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, "Bad Request")
+		}
+		return c.JSON(http.StatusOK, res)
+	} else {
+		res, err := models.RemoveFromCart(itemId, userId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, "Bad Request")
+		}
+		return c.JSON(http.StatusOK, res)
+	}
 }
 
 func ErrorHandler(c echo.Context) error {
@@ -156,7 +204,7 @@ func registerUser(username, password string) (bool, M) {
 
 // Helper
 
-func getUserIdFromJwt(c echo.Context) string {
+func getUserIdFromJwt(c echo.Context) int {
 	// get the user id
 	userClaim := c.Get("user").(*jwt.Token)
 	claims := userClaim.Claims.(*models.MyClaims)

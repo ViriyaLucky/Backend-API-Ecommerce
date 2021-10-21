@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	Id            string `json:"Id" validate:"required"`
+	Id            int    `json:"Id" validate:"required"`
 	Username      string `json:"Name"  validate:"required"`
 	Email         string `json:"Email" validate:"required,email"`
 	Password      string `json:"Password" validate:"required"`
@@ -17,8 +17,6 @@ type User struct {
 }
 
 func AuthenticateUser(username string, password string) (bool, User) {
-	defer database.Connector.Close()
-
 	var user User
 	database.Connector.Table("tbl_user").Where("username = ?", username).Find(&user)
 	if gubrak.IsNil(user) {
@@ -33,7 +31,7 @@ func AuthenticateUser(username string, password string) (bool, User) {
 	return true, user
 }
 
-func GetUserById(id string) User {
+func GetUserById(id int) User {
 	var user User
 	database.Connector.Table("tbl_user").Where("id = ?", id).Find(&user)
 	if gubrak.IsNil(user) {

@@ -5,23 +5,21 @@ import (
 )
 
 type Orders struct {
-	Id           string  `json:"Id"`
-	ProductId    string  `json:"ProductId"`
-	Product      Product `json:"Product"`
-	UserId       string  `json:"Description"`
-	Quantity     string  `json:"Quantity"`
+	Id           int     `json:"Id" gorm:"primary_key"`
+	ProductId    int     `json:"ProductId"`
+	Product      Product `json:"Product" gorm:"foreignKey:ProductId"`
+	UserId       int     `json:"Description"`
+	Quantity     int     `json:"Quantity"`
 	Price        int     `json:"Price"`
 	Created_Date string  `json:"Created_Date" validate:"required"`
 }
 
-func GetOrders(userId string) []Orders {
-	defer database.Connector.Close()
-
+func (Orders) TableName() string {
+	return "tbl_orders"
+}
+func GetOrders(userId int) []Orders {
 	var result []Orders
 	//check if product exist in user cart
-	database.Connector.Table("tbl_orders").Where("user_id = ?", userId).Find(&result)
-	for i, _ := range result {
-		result[i].Product = GetProductById(result[i].ProductId)
-	}
+	database.Connector.Preload("Product").Where("user_id = ?", userId).Find(&result)
 	return result
 }

@@ -7,6 +7,6 @@ import (
 type MyClaims struct {
 	Username string `json:"Username"`
 	Email    string `json:"Email"`
-	Id       string `json:"Id"`
+	Id       int    `json:"Id"`
 	jwt.StandardClaims
 }

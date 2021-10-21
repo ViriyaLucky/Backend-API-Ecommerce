@@ -22,7 +22,10 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:4200"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 	// Login route
 	e.POST("/login", handler.Loginhandler)
 
@@ -30,8 +33,9 @@ func main() {
 	e.POST("/register", handler.Loginhandler)
 
 	// Product API
-	e.GET("/api/v1/product", handler.ProductHandler)
-	// r.GET("/product/", handler.ProductHandler)
+	e.GET("/api/v1/product", handler.ProductHandler)     // Get List of Product
+	e.GET("/api/v1/product/:id", handler.ProductHandler) // Get Product By Id
+	e.POST("/api/v1/product", handler.ProductHandler)    // Add Product
 
 	// Restricted group
 	r := e.Group("/api/v1/user")
@@ -48,8 +52,11 @@ func main() {
 	r.GET("/profile", handler.UserHandler)
 	r.GET("/orders", handler.OrderHandler)
 
-	// // Cart API
-	// r.GET("/cart", handler.CartHandler)
+	// Cart API
+	r.GET("/cart", handler.CartHandler)
+	r.POST("/cart/checkout", handler.CheckoutHandler)
+	r.POST("/cart/:itemid", handler.UpdateCartHandler)
+	r.DELETE("/cart/:itemid", handler.UpdateCartHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
