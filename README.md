@@ -63,9 +63,9 @@ _For more examples, please refer to the [Documentation](https://documenter.getpo
 - [x] Add User Detail
 - [x] Add Add Remove Item in Cart
 - [x] Add Checkout
-- [] Add Register
-- [] Add Product Filtering
-- [] Add Order Filtering
-- [] Add Cart Filtering
+- [ ] Add Register
+- [ ] Add Product Filtering
+- [ ] Add Order Filtering
+- [ ] Add Cart Filtering
 
 <p align="right">(<a href="#top">back to top</a>)</p>
