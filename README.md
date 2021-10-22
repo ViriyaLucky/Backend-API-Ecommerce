@@ -56,6 +56,7 @@ _For more examples, please refer to the [Documentation](https://documenter.getpo
 - [x] Add User Detail
 - [x] Add Remove Item in Cart
 - [x] Add Checkout
+- [ ] Add Business Logic Validation
 - [ ] Add Register
 - [ ] Add Product Filtering
 - [ ] Add Order Filtering

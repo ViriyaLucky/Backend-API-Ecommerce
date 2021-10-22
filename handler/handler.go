@@ -3,16 +3,12 @@ package handler
 import (
 	"ecommerce-api/models"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
-	gubrak "github.com/novalagung/gubrak/v2"
 )
 
 var APPLICATION_NAME = "Backend API"
@@ -27,8 +23,8 @@ func UserHandler(c echo.Context) error {
 	Id := getUserIdFromJwt(c)
 	user := models.GetUserById(Id)
 	if user.Username == "" {
-		return c.JSON(http.StatusNotFound, echo.Map{
-			"error": "user does not exist",
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"error": "user cannot be blank",
 		})
 	}
 	res := map[string]string{
@@ -46,7 +42,7 @@ func Loginhandler(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	if username == "" && password == "" {
-		return c.JSON(http.StatusOK, echo.Map{
+		return c.JSON(http.StatusBadRequest, echo.Map{
 			"error": "Wrong username or password",
 		})
 	}
@@ -140,7 +136,7 @@ func CheckoutHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 	if len(result) == 0 {
-		return c.JSON(http.StatusBadGateway, err)
+		return c.JSON(http.StatusBadRequest, err)
 	}
 	return c.JSON(http.StatusOK, result)
 }
@@ -174,33 +170,33 @@ func ErrorHandler(c echo.Context) error {
 	return echo.ErrUnauthorized
 }
 
-func registerUser(username, password string) (bool, M) {
-	// hashedPassword, errHash := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	// if errHash != nil {
-	// 	return false, nil
-	// }
-	basePath, _ := os.Getwd()
-	dbPath := filepath.Join(basePath, "users.json")
-	buf, _ := ioutil.ReadFile(dbPath)
+// func registerUser(username, password string) (bool, M) {
+// 	// hashedPassword, errHash := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+// 	// if errHash != nil {
+// 	// 	return false, nil
+// 	// }
+// 	basePath, _ := os.Getwd()
+// 	dbPath := filepath.Join(basePath, "users.json")
+// 	buf, _ := ioutil.ReadFile(dbPath)
 
-	data := make([]M, 0)
-	err := json.Unmarshal(buf, &data)
-	if err != nil {
-		return false, nil
-	}
+// 	data := make([]M, 0)
+// 	err := json.Unmarshal(buf, &data)
+// 	if err != nil {
+// 		return false, nil
+// 	}
 
-	res := gubrak.From(data).Find(func(each M) bool {
-		return each["username"] == username && each["password"] == password
-	}).Result()
+// 	res := gubrak.From(data).Find(func(each M) bool {
+// 		return each["username"] == username && each["password"] == password
+// 	}).Result()
 
-	if res != nil {
-		resM := res.(M)
-		delete(resM, "password")
-		return true, resM
-	}
+// 	if res != nil {
+// 		resM := res.(M)
+// 		delete(resM, "password")
+// 		return true, resM
+// 	}
 
-	return false, nil
-}
+// 	return false, nil
+// }
 
 // Helper
 
