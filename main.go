@@ -22,15 +22,12 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:4200"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
+	e.Use(middleware.CORS())
 	// Login route
-	e.POST("/login", handler.Loginhandler)
+	e.POST("/api/v1/login", handler.Loginhandler)
 
-	// Register route
-	e.POST("/register", handler.Loginhandler)
+	// // Register route
+	// e.POST("/api/v1/register", handler.Loginhandler)
 
 	// Product API
 	e.GET("/api/v1/product", handler.ProductHandler)     // Get List of Product
@@ -39,7 +36,7 @@ func main() {
 
 	// Restricted group
 	r := e.Group("/api/v1/user")
-
+	// r.Use(middleware.CORS())
 	// Configure middleware with the custom claims type
 	config := middleware.JWTConfig{
 		Claims:     &models.MyClaims{},
